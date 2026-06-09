@@ -6,6 +6,9 @@ import pandas as pd
 from dotenv import load_dotenv
 from domain import BATCH_SIZE, build_prompt
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+MAX_WORKERS = 14
 
 load_dotenv()
 
@@ -43,24 +46,32 @@ class DomainClassifier:
         result = json.loads(response["body"].read())
         return result["content"][0]["text"]
 
-    # 데이터셋을 BATCH_SIZE 단위로 나눠 Bedrock에 분류 요청하고 전체 결과 반환
+    # 단일 배치를 Bedrock에 요청하고 파싱된 결과 반환
+    def _process_batch(self, batch_index: int, batch: list[dict], num_batches: int) -> list[dict]:
+        print(f"배치 {batch_index+1}/{num_batches} 처리 중... ({len(batch)}개)")
+        prompt = build_prompt(batch)
+        raw = self._call_bedrock(prompt)
+        raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            print(f"  배치 {batch_index+1} 파싱 실패, raw 응답:\n{raw[:200]}")
+            return []
+
+    # 데이터셋을 BATCH_SIZE 단위로 나눠 병렬로 Bedrock에 분류 요청하고 전체 결과 반환
     def classify_batch(self, dataset: list[dict]) -> list[dict]:
-        #dataset = dataset[:50]  # 최대 50개 질문만 처리
         total = len(dataset)
         num_batches = math.ceil(total / BATCH_SIZE)
+        batches = [dataset[i * BATCH_SIZE : (i + 1) * BATCH_SIZE] for i in range(num_batches)]
         results = []
 
-        for i in range(num_batches):
-            batch = dataset[i * BATCH_SIZE : (i + 1) * BATCH_SIZE]
-            print(f"배치 {i+1}/{num_batches} 처리 중... ({len(batch)}개)")
-            prompt = build_prompt(batch)
-            raw = self._call_bedrock(prompt)
-            raw = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-            try:
-                parsed = json.loads(raw)
-                results.extend(parsed)
-            except json.JSONDecodeError:
-                print(f"  배치 {i+1} 파싱 실패, raw 응답:\n{raw[:200]}")
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            futures = {
+                executor.submit(self._process_batch, i, batch, num_batches): i
+                for i, batch in enumerate(batches)
+            }
+            for future in as_completed(futures):
+                results.extend(future.result())
 
         return results
 
