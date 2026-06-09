@@ -8,11 +8,14 @@ from domain import BATCH_SIZE, build_prompt
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-MAX_WORKERS = 14
+MAX_WORKERS =14
 
 load_dotenv()
 
-MODEL = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+#MODEL = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+#MODEL = "global.anthropic.claude-haiku-4-5-20251001-v1:0"
+MODEL = "global.anthropic.claude-opus-4-6-v1"
+#MODEL = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 
 
 class DomainClassifier:
@@ -81,6 +84,7 @@ class DomainClassifier:
 
         self.df["LLM 도메인 분류 결과"] = ""
         self.df["성공 여부"] = ""
+        self.df["추론 과정"] = ""
         self.df["분류 의견"] = ""
 
         for idx, row in self.df.iterrows():
@@ -89,6 +93,7 @@ class DomainClassifier:
                 r = results_map[no]
                 self.df.at[idx, "LLM 도메인 분류 결과"] = r["domain"]
                 self.df.at[idx, "성공 여부"] = "O" if r["domain"] == row["도메인 Ground Truth"] else "X"
+                self.df.at[idx, "추론 과정"] = r.get("reasoning", "")
                 self.df.at[idx, "분류 의견"] = r["opinion"]
 
         self.df["분류 의견 그룹"] = self.df["성공 여부"].apply(
