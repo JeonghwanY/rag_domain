@@ -1,0 +1,5 @@
+.env
+venv
+old
+__pycache__
+DS_Store
