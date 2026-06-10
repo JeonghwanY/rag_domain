@@ -1,4 +1,5 @@
 import boto3
+from botocore.config import Config
 import os
 import json
 import math
@@ -8,14 +9,16 @@ from domain import BATCH_SIZE, build_prompt
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-MAX_WORKERS =14
+MAX_WORKERS =20
 
 load_dotenv()
 
+
 #MODEL = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
-#MODEL = "global.anthropic.claude-haiku-4-5-20251001-v1:0"
-MODEL = "global.anthropic.claude-opus-4-6-v1"
-#MODEL = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+MODEL = "global.anthropic.claude-haiku-4-5-20251001-v1:0"
+#MODEL = "global.anthropic.claude-opus-4-6-v1"
+#MODEL = "global.anthropic.claude-sonnet-4-6"
+#MODEL = "global.anthropic.claude-opus-4-8"
 
 
 class DomainClassifier:
@@ -25,6 +28,7 @@ class DomainClassifier:
         self.client = boto3.client(
             service_name="bedrock-runtime",
             region_name=os.getenv("BEDROCK_REGION"),
+            config=Config(read_timeout=300, connect_timeout=300),
         )
         self.df = None
         self.excel_path = None

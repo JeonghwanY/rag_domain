@@ -3,3 +3,5 @@ venv
 old
 __pycache__
 DS_Store
+xlsxfile_result.xlsx
+~$xlsxfile_result.xlsx
