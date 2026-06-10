@@ -112,6 +112,11 @@ class DomainClassifier:
         print(f"저장 완료: {output_path}")
         print(f"정확도: {correct}/{total} ({correct/total*100:.1f}%)")
 
+        wrong_df = self.df[self.df["성공 여부"] == "X"]
+        wrong_path = self.excel_path.replace(".xlsx", "_wrong.xlsx")
+        wrong_df.to_excel(wrong_path, index=False)
+        print(f"오답 파일 저장 완료: {wrong_path} ({len(wrong_df)}개)")
+
 
 
 
