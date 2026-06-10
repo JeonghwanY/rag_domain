@@ -88,8 +88,7 @@ class DomainClassifier:
 
         self.df["LLM 도메인 분류 결과"] = ""
         self.df["성공 여부"] = ""
-        self.df["추론 과정"] = ""
-        self.df["분류 의견"] = ""
+        self.df["고객 의도 분석"] = ""
 
         for idx, row in self.df.iterrows():
             no = row["No"]
@@ -97,8 +96,7 @@ class DomainClassifier:
                 r = results_map[no]
                 self.df.at[idx, "LLM 도메인 분류 결과"] = r["domain"]
                 self.df.at[idx, "성공 여부"] = "O" if r["domain"] == row["도메인 Ground Truth"] else "X"
-                self.df.at[idx, "추론 과정"] = r.get("reasoning", "")
-                self.df.at[idx, "분류 의견"] = r["opinion"]
+                self.df.at[idx, "고객 의도 분석"] = r.get("intent_analysis", "")
 
         self.df["분류 의견 그룹"] = self.df["성공 여부"].apply(
             lambda x: "정답" if x == "O" else "오답"

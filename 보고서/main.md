@@ -27,7 +27,6 @@ Excel 입력 → 배치 분할 → 병렬 Bedrock 호출 → 결과 병합 → E
 
 ### 모델 옵션 (주석 전환)
 ```python
-# us.anthropic.claude-haiku-4-5-20251001-v1:0   # US 리전 Haiku
   global.anthropic.claude-haiku-4-5-20251001-v1:0  # Global Haiku (현재 사용)
 # global.anthropic.claude-opus-4-6-v1            # Global Opus 4.6
 # global.anthropic.claude-sonnet-4-6             # Global Sonnet 4.6
