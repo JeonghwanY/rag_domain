@@ -1,4 +1,3 @@
-#한번 더 추론
 import boto3
 from botocore.config import Config
 import os
@@ -6,11 +5,11 @@ import json
 import math
 import pandas as pd
 from dotenv import load_dotenv
-from domain import BATCH_SIZE, build_prompt, SYSTEM_PROMPT
+from domain import BATCH_SIZE, build_prompt
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-MAX_WORKERS =10
+MAX_WORKERS =20
 
 load_dotenv()
 
@@ -45,8 +44,7 @@ class DomainClassifier:
         body = json.dumps({
             "anthropic_version": "bedrock-2023-05-31",
             "max_tokens": 8192,
-            "temperature": 0,
-            "system": SYSTEM_PROMPT,
+            "temperature": 0, 
             "messages": [{"role": "user", "content": prompt}]
         })
         response = self.client.invoke_model(
